@@ -58,8 +58,7 @@ jobs:
           if [[ "${{ matrix.os }}" == "windows-latest" ]]
           then
             cp target/${{ matrix.target }}/release/github-follow-checker.exe release/
-            cd release
-            zip github-follow-checker-${{ matrix.target }}.zip *
+            powershell -Command "Compress-Archive -Path release/* -DestinationPath github-follow-checker-${{ matrix.target }}.zip"
           else
             cp target/${{ matrix.target }}/release/github-follow-checker release/
             tar -czf github-follow-checker-${{ matrix.target }}.tar.gz -C release .
