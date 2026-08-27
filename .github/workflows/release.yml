@@ -35,18 +35,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-
-
-      - name: Install target
-        run: rustup target add ${{ matrix.target }}
-
+        with:
+          targets: ${{ matrix.target }}
 
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
