@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        include:
+
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive: zip
+
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive: tar.gz
+
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            archive: tar.gz
+
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            archive: tar.gz
+
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+
+      - name: Build
+        run:
+
+          cargo build --release --target ${{ matrix.target }}
+
+
+      - name: Create Archive
+        shell: bash
+        run: |
+
+          mkdir release
+
+          cp README.md release/
+
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]
+          then
+            cp target/${{ matrix.target }}/release/github-follow-checker.exe release/
+            cd release
+            zip github-follow-checker-${{ matrix.target }}.zip *
+          else
+            cp target/${{ matrix.target }}/release/github-follow-checker release/
+            tar -czf github-follow-checker-${{ matrix.target }}.tar.gz -C release .
+          fi
+
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.zip
+            release/*.tar.gz
